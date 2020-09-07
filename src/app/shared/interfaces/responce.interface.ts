@@ -1,3 +1,3 @@
-export interface FavoriteResponse {
+export interface Response {
     name: string;
 }

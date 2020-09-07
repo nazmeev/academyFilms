@@ -17,6 +17,10 @@ import { PipeFavoritedPipe } from './shared/pipes/pipe-favorited.pipe';
 import { FavoritesComponent } from './favorites/favorites.component';
 import { FavoritesItemComponent } from './favorites/favorites-item/favorites-item.component';
 import { MenuComponent } from './shared/components/menu/menu.component';
+import { SearchComponent } from './shared/components/search/search.component';
+import { UsersComponent } from './users/users.component';
+import { RegistrationComponent } from './users/registration/registration.component';
+import { LoginComponent } from './users/login/login.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +32,11 @@ import { MenuComponent } from './shared/components/menu/menu.component';
     FilmsItemComponent,
     PipeFavoritedPipe,
     FavoritesComponent,
-    FavoritesItemComponent
+    FavoritesItemComponent,
+    SearchComponent,
+    RegistrationComponent,
+    UsersComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
@@ -41,7 +49,8 @@ import { MenuComponent } from './shared/components/menu/menu.component';
   providers: [{
     provide: HTTP_INTERCEPTORS,
     useClass: ApiinterceptorService,
-    multi: true
+    multi: true,
+    
   }],
   bootstrap: [AppComponent]
 })

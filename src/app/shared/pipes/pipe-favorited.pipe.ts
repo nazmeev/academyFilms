@@ -16,7 +16,6 @@ export class PipeFavoritedPipe implements PipeTransform {
         item.favId = favorite[0].id
       }else{
         item.favorited = false
-        delete item.favId
       }
     })
     return array;

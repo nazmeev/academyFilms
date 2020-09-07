@@ -13,5 +13,6 @@ export interface Film {
     video: boolean;
     vote_average: number;
     vote_count: number;
-    favorited: boolean; 
+    favorited: boolean;
+    visible?: boolean
 }

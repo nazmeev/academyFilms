@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { FavoriteResponse } from '../interfaces/responce.interface';
+import { Response } from '../interfaces/responce.interface';
 import { Favorite } from '../interfaces/favorite.interface';
 import { Film } from '../interfaces/film.interface';
 
@@ -18,7 +18,7 @@ export class FavoriteService {
   constructor(private http: HttpClient) { }
 
   create(favorite: Favorite): Observable<Favorite> {
-    return this.http.post<FavoriteResponse>(`${FavoriteService.url}.json`, favorite).pipe(
+    return this.http.post<Response>(`${FavoriteService.url}.json`, favorite).pipe(
       map(res => {
         console.log('resp', { ...favorite, id: res.name })
         return { ...favorite, id: res.name }
@@ -29,8 +29,10 @@ export class FavoriteService {
   load(): Observable<Favorite[]> {
     return this.http.get<Favorite[]>(`${FavoriteService.url}.json`).pipe(
       map(res => {
-        if (!res) return []
-        return Object.keys(res).map(key => ({ ...res[key], id: key }))
+        if (!res) return [];
+        const mappedFavorites = Object.keys(res).map(key => ({ ...res[key], id: key }))
+        this.favorites = mappedFavorites;
+        return this.favorites;
       })
     )
   }

@@ -3,8 +3,9 @@ import { FilmsService } from '../shared/services/films.service';
 import { FavoriteService } from '../shared/services/favorite.service';
 import { Favorite } from '../shared/interfaces/favorite.interface';
 import { responceFilms } from '../shared/interfaces/responceFilms.interface';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { Film } from '../shared/interfaces/film.interface';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-films',
@@ -23,56 +24,62 @@ export class FilmsComponent implements OnInit {
   public imgPath = this.filmsService.smallImgPath
 
   constructor(
-    public filmsService: FilmsService,
-    public favoriteService: FavoriteService
-  ) { }
+    private filmsService: FilmsService,
+    private favoriteService: FavoriteService
+  ) {  }
 
   ngOnInit(): void {
-    this.films = this.filmsService.getFilms()
-    if (this.films.length) {
-      console.log('return data from service')
-      this.favorites = this.favoriteService.getFavorites()
-      this.loaded = true
-    } else {
-      this.getPopularFilms()
-    }
+    console.log('ngOnInit')
+    this.getPopularFilms3()
   }
 
   getPopularFilms() {
-    console.log('return load data')
-    this.filmsService.setPage(1)
+    console.log('loading data')
     forkJoin(
       this.filmsService.loadFilms(),
       this.favoriteService.load()
     )
       .subscribe(([films, favorites]) => {
-        let filmList: any = films
-        let favoriteList: any = favorites
-
-        this.filmsService.setPage(filmList.page + 1)
-        this.filmsService.setFilms(filmList.results)
-        this.favoriteService.setFavorites(favoriteList)
+        this.films = films
+        this.favorites = favorites
         this.loaded = true
-
-        this.films = this.filmsService.films
-        this.favorites = this.favoriteService.favorites
       })
+  }
+  getPopularFilms2() {
+    this.filmsService.loadFilms().pipe(
+      switchMap((films: Film[]) => {
+        this.films = films;
+        return this.favoriteService.load()
+      }),
+      switchMap((favorites: Favorite[]) => {
+        this.favorites = favorites;
+        return of(true);
+      })
+    ).subscribe((loaded: boolean) => {
+      this.loaded = loaded;
+    })
+  }
+  getPopularFilms3() {
+    this.filmsService.loadFilms().subscribe(
+      (filmList: Film[]) => {
+        this.films = filmList
+        this.favoriteService.load().subscribe(
+          (favoritesList: Favorite[]) => {
+            this.favorites = favoritesList
+            this.loaded = true
+        })
+      }
+    )
   }
 
   loadMore() {
     console.log('loadMore')
 
     if (this.moreActive)
-      this.filmsService.loadFilms().subscribe(
-        (filmList: responceFilms) => {
-          this.filmsService.addFilms(filmList.results)
-          this.filmsService.setPage(filmList.page + 1)
-          this.films = this.filmsService.films
-          if (this.filmsService.getPage() > this.maxPages) {
-            this.moreActive = false
-            this.filmsService.setPage(1)
-          }
-        }, err => console.error('err', err))
+      this.filmsService.loadFilms().subscribe(films => {
+        this.films = films
+        if (this.filmsService.getPage > this.maxPages) this.moreActive = false
+      }, err => console.error('err', err))
   }
 
   addFavorite(id: number) {
